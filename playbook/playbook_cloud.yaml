@@ -1,0 +1,30 @@
+---
+- name: Configure host
+  hosts: "all"
+
+  tasks:
+    - name: Create user 'cloudru'
+      user:
+        name: cloudru
+        password: "{{ 'cloudpass' | password_hash('sha512') }}"
+        state: present
+
+    - name: Allow SSH access for 'cloudru' with public key
+      authorized_key:
+        user: cloudru
+        key: "{{ lookup('file', 'public_key.pub') }}"
+        state: present
+
+    - name: Disable SSH login for 'root'
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin'
+        line: "PermitRootLogin no"
+        state: present
+      notify: Restart SSH
+
+  handlers:
+    - name: Restart SSH
+      service:
+        name: sshd
+        state: restarted

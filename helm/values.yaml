@@ -1,0 +1,5 @@
+image:
+  repository: 192.168.50.5:5000/cloud_rep
+  tag: "1.0"
+replicaCount: 3
+author: chursin_na

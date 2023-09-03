@@ -1,0 +1,4 @@
+apiVersion: v2
+name: cloud_rep
+description: A Helm chart for your application
+version: 1.0.0

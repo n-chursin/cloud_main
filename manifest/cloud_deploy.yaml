@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cloud_namespace
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud_test_task_deployment
+  namespace: cloud_namespace
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cloud_test_task
+  template:
+    metadata:
+      labels:
+        app: cloud_test_task
+    spec:
+      containers:
+        - name: cloud_test_task_container
+          image: 192.168.50.5:5000/cloud_rep:1.0
+          ports:
+            - containerPort: 8000
+          env:
+            - name: UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+          readinessProbe:
+            httpGet:
+              path: /hostname
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /hostname
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 3
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud_test_task_service
+  namespace: cloud_namespace
+spec:
+  type: ClusterIP
+  selector:
+    app: cloud_test_task
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
